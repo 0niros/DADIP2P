@@ -49,6 +49,7 @@ type P2PConfig struct {
 	MyAddr         string // not in yaml
 	CacheConfig    CacheConfig
 	PrefetchConfig PrefetchConfig
+	PrepushConfig  PrepushConfig
 }
 
 type CertConfig struct {
@@ -66,6 +67,11 @@ type CacheConfig struct {
 type PrefetchConfig struct {
 	PrefetchEnable bool
 	PrefetchThread int
+}
+
+type PrepushConfig struct {
+	PrepushWorkers int
+	PrepushEnable  bool
 }
 
 // CheckConfig used to check config and fix some configuration

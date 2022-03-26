@@ -42,3 +42,9 @@ P2PConfig:
     PrefetchEnable: true
     # PrefetchThread
     PrefetchThread: 64
+  #PrepushConfig
+  PrepushConfig:
+    #prepushWorkers
+    PrepushWorkers: 16
+    #PrepushEnable
+	  PrepushEnable: true
