@@ -45,6 +45,17 @@ func (fs P2PFS) Open(path string, req *http.Request) (*P2PFile, error) {
 	return &file, err
 }
 
+//Record a BlockCache
+func (fs P2PFS) Record(path string, offset int, count int, buf []byte) (int, error) {
+	if _, err := fs.cache.GetOrRefill(path, int64(offset), count, func() ([]byte, error) {
+		return buf, nil
+	}); err != nil {
+		return 0, err
+	}
+
+	return len(buf), nil
+}
+
 // Stat get file length
 func (fs P2PFS) Stat(path string, req *http.Request) (int64, error) {
 	file, err := fs.Open(path, req)
