@@ -54,6 +54,7 @@ type fileCachePoolImpl struct {
 	fileCache *ristretto.Cache
 	memCache  *ristretto.Cache
 	media     string
+	cacheList CacheList
 	lock      sync.Mutex
 }
 
@@ -132,7 +133,7 @@ func NewCachePool(config *Config) FileCachePool {
 	if err := os.MkdirAll(config.CacheMedia, 0755); err != nil {
 		log.Fatalf("Mkdir %s fail! %s", config.CacheMedia, err)
 	}
-	cachePool := &fileCachePoolImpl{}
+	cachePool := &fileCachePoolImpl{cacheList: NewCacheList()}
 	var err error
 	if cachePool.fileCache, err = ristretto.NewCache(&ristretto.Config{
 		NumCounters: 1e7,

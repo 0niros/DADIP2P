@@ -31,6 +31,12 @@ type SyncList interface {
 	MoveToFront(e *list.Element)
 	// Front get the list front
 	Front() *list.Element
+	//Travel get Elements in list
+	Travel() []*list.Element
+	//TravelN get the first n Elements in List
+	TravelN(n int) []*list.Element
+	//Move item to front by val
+	MoveToFrontByVal(v interface{})
 }
 
 // RwSyncList is a SyncList implementation
@@ -62,8 +68,46 @@ func (m *RwSyncList) MoveToFront(e *list.Element) {
 	m.l.MoveToFront(e)
 }
 
+func (m *RwSyncList) MoveToFrontByVal(v interface{}) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	e := m.l.Front()
+	for node := m.l.Front(); node != nil; {
+		if node.Value == v {
+			e = node
+			break
+		}
+		node = node.Next()
+	}
+	m.l.MoveToFront(e)
+}
+
 func (m *RwSyncList) Front() *list.Element {
 	m.lock.RLock()
 	defer m.lock.RUnlock()
 	return m.l.Front()
+}
+
+func (m *RwSyncList) Travel() []*list.Element {
+	m.lock.RLock()
+	defer m.lock.Unlock()
+	ret := []*list.Element{}
+	for node := m.l.Front(); node != nil; {
+		ret = append(ret, node)
+		node = node.Next()
+	}
+
+	return ret
+}
+
+func (m *RwSyncList) TravelN(n int) []*list.Element {
+	m.lock.RLock()
+	defer m.lock.Unlock()
+	ret, i := []*list.Element{}, 0
+	for node := m.l.Front(); node != nil && i < n; i++ {
+		ret = append(ret, node)
+		node = node.Next()
+	}
+
+	return ret
 }
