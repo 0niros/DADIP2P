@@ -10,7 +10,7 @@ import (
 type CacheList interface {
 	GetItemsByPath(path string) []string
 	GetNItemByPath(path string, n int) []string
-	InsertCacheItem(path string, fullPath string) error
+	HitOrInsertCacheItem(path string, fullPath string) error
 	CheckCacheItem(fullPath string) bool
 }
 
@@ -25,6 +25,11 @@ func NewCacheList() CacheList {
 }
 
 func (c *cacheListImpl) GetItemsByPath(path string) []string {
+	_, pathExist := c.pathList[path]
+	if !pathExist {
+		return nil
+	}
+
 	list, ret := c.pathList[path].Travel(), []string{}
 	for i := range list {
 		val := list[i].Value.(string)
@@ -37,6 +42,11 @@ func (c *cacheListImpl) GetItemsByPath(path string) []string {
 }
 
 func (c *cacheListImpl) GetNItemByPath(path string, n int) []string {
+	_, pathExist := c.pathList[path]
+	if !pathExist {
+		return nil
+	}
+
 	list, ret := c.pathList[path].TravelN(n), []string{}
 	for i := range list {
 		val := list[i].Value.(string)
@@ -54,14 +64,20 @@ func (c *cacheListImpl) CheckCacheItem(fullPath string) bool {
 	return check && val.(bool)
 }
 
-func (c *cacheListImpl) InsertCacheItem(path string, fullPath string) error {
+func (c *cacheListImpl) HitOrInsertCacheItem(path string, fullPath string) error {
+	_, pathExist := c.pathList[path]
+	if !pathExist {
+		newList := synclist.NewSyncList()
+		c.pathList[path] = newList
+	}
+
 	if c.CheckCacheItem(fullPath) {
 		c.pathList[path].MoveToFrontByVal(fullPath)
 		return nil
 	}
 	list := c.pathList[path].PushFront(fullPath)
 	if list.Value != fullPath {
-		return errors.New("Insert Cacheitem Error")
+		return errors.New("insert cacheitem Error")
 	}
 	c.blockExist.Set(fullPath, true)
 

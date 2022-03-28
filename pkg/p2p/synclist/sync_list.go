@@ -63,6 +63,7 @@ func (m *RwSyncList) Remove(e *list.Element) interface{} {
 }
 
 func (m *RwSyncList) MoveToFront(e *list.Element) {
+
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	m.l.MoveToFront(e)
@@ -72,6 +73,9 @@ func (m *RwSyncList) MoveToFrontByVal(v interface{}) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	e := m.l.Front()
+	if e == nil {
+		return
+	}
 	for node := m.l.Front(); node != nil; {
 		if node.Value == v {
 			e = node
@@ -90,7 +94,7 @@ func (m *RwSyncList) Front() *list.Element {
 
 func (m *RwSyncList) Travel() []*list.Element {
 	m.lock.RLock()
-	defer m.lock.Unlock()
+	defer m.lock.RUnlock()
 	ret := []*list.Element{}
 	for node := m.l.Front(); node != nil; {
 		ret = append(ret, node)
@@ -102,7 +106,7 @@ func (m *RwSyncList) Travel() []*list.Element {
 
 func (m *RwSyncList) TravelN(n int) []*list.Element {
 	m.lock.RLock()
-	defer m.lock.Unlock()
+	defer m.lock.RUnlock()
 	ret, i := []*list.Element{}, 0
 	for node := m.l.Front(); node != nil && i < n; i++ {
 		ret = append(ret, node)
