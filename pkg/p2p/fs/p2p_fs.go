@@ -33,10 +33,13 @@ type P2PFS struct {
 	apikey       string
 	prefetchable bool
 	preTask      chan prefetchTask
+	prePush      Prepush
 }
 
 // Open a p2pFile object
 func (fs P2PFS) Open(path string, req *http.Request) (*P2PFile, error) {
+	newReq := ReqTask{path: path, reqHost: req.Host}
+	fs.prePush.CallPrepush(newReq)
 	file := P2PFile{path, fs, 0, 0, newRemoteSource(req, fs.hp, fs.apikey)}
 	fileSize, err := file.Fstat()
 	if fs.prefetchable {

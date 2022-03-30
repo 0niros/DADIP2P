@@ -10,6 +10,7 @@ type Prepush interface {
 	StartPrepushWorker()
 	PredictPushBlocks(req ReqTask) []PushBlock
 	PushBlock(block PushBlock) error
+	CallPrepush(req ReqTask)
 }
 
 type ReqTask struct {
@@ -19,23 +20,26 @@ type ReqTask struct {
 
 type PushBlock struct {
 	pushTo string
-	path   string
-	offset int
-	count  int
+	key    string
 }
 
 type prepushImpl struct {
 	prepushEnable  bool
 	prepushWorkers int64
-	cachepool      *cache.FileCachePool
+	cachepool      cache.FileCachePool
 	reqTask        chan ReqTask
+}
+
+func (pp *prepushImpl) CallPrepush(req ReqTask) {
+	pp.reqTask <- req
 }
 
 func (pp *prepushImpl) PredictPushBlocks(req ReqTask) []PushBlock {
 	ret := []PushBlock{}
-
-	
-
+	pushTasks := pp.cachepool.Predict(req.path)
+	for i := range pushTasks {
+		ret = append(ret, PushBlock{})
+	}
 	return ret
 }
 
@@ -45,7 +49,7 @@ func (pp *prepushImpl) StartPrepushWorker() {
 			pushBlks := pp.PredictPushBlocks(req)
 			for _, k := range pushBlks {
 				if err := pp.PushBlock(k); err != nil {
-					log.Warnf("Push Block from %s error", k.path)
+					log.Warnf("Push Block from %s error", k.key)
 				}
 			}
 		}
@@ -57,7 +61,7 @@ func (pp *prepushImpl) PushBlock(block PushBlock) error {
 	return nil
 }
 
-func NewPrepush(config *configure.DeployConfig, cachePool *cache.FileCachePool) Prepush {
+func NewPrepush(config *configure.DeployConfig, cachePool cache.FileCachePool) Prepush {
 	pp := &prepushImpl{
 		prepushEnable:  config.P2PConfig.PrepushConfig.PrepushEnable,
 		prepushWorkers: int64(config.P2PConfig.PrepushConfig.PrepushWorkers),

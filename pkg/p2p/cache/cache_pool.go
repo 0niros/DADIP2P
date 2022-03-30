@@ -48,6 +48,8 @@ type FileCachePool interface {
 	PutHost(path string, host string) bool
 	// DelHost clear P2P Host for key
 	DelHost(path string)
+	//Predict blocks
+	Predict(path string) []string
 }
 
 type fileCachePoolImpl struct {
@@ -56,6 +58,12 @@ type fileCachePoolImpl struct {
 	media     string
 	cacheList CacheList
 	lock      sync.Mutex
+}
+
+func (c *fileCachePoolImpl) Predict(path string) []string {
+	c.lock.Lock()
+	c.fileCache.Wait()
+	return c.cacheList.GetNItemByPath(path, 64)
 }
 
 func (c *fileCachePoolImpl) GetOrRefill(path string, offset int64, count int, fetch func() ([]byte, error)) ([]byte, error) {
