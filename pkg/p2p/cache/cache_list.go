@@ -13,23 +13,38 @@ type CacheList interface {
 	GetNItemByPath(path string, n int) []string
 	HitOrInsertCacheItem(path string, fullPath string) error
 	CheckCacheItem(fullPath string) bool
+	ListenAndCatchBlocks()
+	CHAN(s string)
 }
 
 type cacheListImpl struct {
 	pathList    map[string]synclist.SyncList
 	blockExist  syncmap.SyncMap
+	catchPath   synclist.SyncList
 	catchBlocks chan string
 }
 
 func NewCacheList() CacheList {
-	sList, sMap := make(map[string]synclist.SyncList), syncmap.NewSyncMap()
-	return &cacheListImpl{sList, sMap, make(chan string, 16)}
+	sList, sMap, catchPaths := make(map[string]synclist.SyncList), syncmap.NewSyncMap(), synclist.NewSyncList()
+	ret := &cacheListImpl{sList, sMap, catchPaths, make(chan string, 16)}
+	ret.ListenAndCatchBlocks()
+	return ret
 }
 
-func (c *cacheListImpl) ListenAndCatchBlocks(path string, fullName string) {
-	timer := time.NewTimer(time.Second * 1)
-	go func() {
+func (c *cacheListImpl) CHAN(s string) {
+	c.catchBlocks <- s
+}
 
+func (c *cacheListImpl) ListenAndCatchBlocks() {
+	go func() {
+		for seg := range c.catchBlocks {
+			catchPathsNow := c.catchPath.Travel()
+			for i := range catchPathsNow {
+				if catchPathsNow[i].Value.(string) != "" {
+					c.HitOrInsertCacheItem(catchPathsNow[i].Value.(string), seg)
+				}
+			}
+		}
 	}()
 }
 
@@ -89,6 +104,16 @@ func (c *cacheListImpl) HitOrInsertCacheItem(path string, fullPath string) error
 		return errors.New("insert cacheitem Error")
 	}
 	c.blockExist.Set(fullPath, true)
+
+	go func() {
+		if c.catchPath.Find(path) {
+			return
+		}
+		ticker := time.NewTicker(1000 * time.Second)
+		e := c.catchPath.PushFront(path)
+		<-ticker.C
+		c.catchPath.Remove(e)
+	}()
 
 	return nil
 }

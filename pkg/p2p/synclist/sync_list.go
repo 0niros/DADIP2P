@@ -37,6 +37,8 @@ type SyncList interface {
 	TravelN(n int) []*list.Element
 	//Move item to front by val
 	MoveToFrontByVal(v interface{})
+	//Find item by val
+	Find(v interface{}) bool
 }
 
 // RwSyncList is a SyncList implementation
@@ -84,6 +86,23 @@ func (m *RwSyncList) MoveToFrontByVal(v interface{}) {
 		node = node.Next()
 	}
 	m.l.MoveToFront(e)
+}
+
+func (m *RwSyncList) Find(c interface{}) bool {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	e := m.l.Front()
+	if e == nil {
+		return false
+	}
+	for node := m.l.Front(); node != nil; {
+		if node.Value == c {
+			return true
+		}
+		node = node.Next()
+	}
+
+	return false
 }
 
 func (m *RwSyncList) Front() *list.Element {

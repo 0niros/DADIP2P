@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/cache"
 )
@@ -21,8 +22,20 @@ func main() {
 	cl.HitOrInsertCacheItem("l2", "/l2/v2")
 	fmt.Println(cl.GetItemsByPath("l2"))
 
-	fmt.Println(cl.CheckCacheItem("/l1/l1"))
-	fmt.Println(cl.CheckCacheItem("/l1/v1"))
-	fmt.Println(cl.CheckCacheItem("/l2/v2"))
-	fmt.Println(cl.GetNItemByPath("l1", 10))
+	for {
+		p, v := 0, 0
+		fmt.Scanf("%d\n", &p)
+		switch p {
+		case 1:
+			fmt.Scanf("%d\n", &v)
+			cl.HitOrInsertCacheItem("l1", strconv.Itoa(v))
+			cl.CHAN(strconv.Itoa(v))
+			fmt.Println(cl.GetItemsByPath("l1"))
+		case 2:
+			fmt.Scanf("%d\n", &v)
+			cl.HitOrInsertCacheItem("l2", strconv.Itoa(v))
+			cl.CHAN(strconv.Itoa(v))
+			fmt.Println(cl.GetItemsByPath("l2"))
+		}
+	}
 }
