@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"time"
 
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/synclist"
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/syncmap"
@@ -15,13 +16,21 @@ type CacheList interface {
 }
 
 type cacheListImpl struct {
-	pathList   map[string]synclist.SyncList
-	blockExist syncmap.SyncMap
+	pathList    map[string]synclist.SyncList
+	blockExist  syncmap.SyncMap
+	catchBlocks chan string
 }
 
 func NewCacheList() CacheList {
 	sList, sMap := make(map[string]synclist.SyncList), syncmap.NewSyncMap()
-	return &cacheListImpl{sList, sMap}
+	return &cacheListImpl{sList, sMap, make(chan string, 16)}
+}
+
+func (c *cacheListImpl) ListenAndCatchBlocks(path string, fullName string) {
+	timer := time.NewTimer(time.Second * 1)
+	go func() {
+
+	}()
 }
 
 func (c *cacheListImpl) GetItemsByPath(path string) []string {
