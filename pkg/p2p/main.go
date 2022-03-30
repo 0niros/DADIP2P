@@ -15,11 +15,11 @@ func main() {
 		//fmt.Println("============第", i, "轮============")
 		v := i
 		cl.HitOrInsertCacheItem("l1", strconv.Itoa(v))
-		cl.CHAN(strconv.Itoa(v))
+		cl.RecordWithChan(strconv.Itoa(v))
 		//fmt.Println(cl.GetItemsByPath("l1"))
 		v++
 		cl.HitOrInsertCacheItem("l2", strconv.Itoa(v))
-		cl.CHAN(strconv.Itoa(v))
+		cl.RecordWithChan(strconv.Itoa(v))
 		//fmt.Println(cl.GetItemsByPath("l2"))
 	}
 	time.Sleep(4 * time.Second)

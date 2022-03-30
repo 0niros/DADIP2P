@@ -2,6 +2,7 @@ package cache
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/synclist"
@@ -14,7 +15,7 @@ type CacheList interface {
 	HitOrInsertCacheItem(path string, fullPath string) error
 	CheckCacheItem(path string, fullPath string) bool
 	ListenAndCatchBlocks()
-	CHAN(s string)
+	RecordWithChan(s string)
 }
 
 type cacheListImpl struct {
@@ -27,10 +28,19 @@ func NewCacheList() CacheList {
 	sList, catchPaths := make(map[string]synclist.SyncList), synclist.NewSyncList()
 	ret := &cacheListImpl{sList, catchPaths, make(chan string, 16)}
 	ret.ListenAndCatchBlocks()
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			fmt.Println("[Log] : ")
+			for k := range ret.pathList {
+				fmt.Println(ret.GetItemsByPath(k))
+			}
+		}
+	}()
 	return ret
 }
 
-func (c *cacheListImpl) CHAN(s string) {
+func (c *cacheListImpl) RecordWithChan(s string) {
 	c.catchBlocks <- s
 }
 

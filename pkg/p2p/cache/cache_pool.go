@@ -87,6 +87,7 @@ retry:
 		}
 		value = item.Val()
 	}
+	c.cacheList.RecordWithChan(key)
 	c.cacheList.HitOrInsertCacheItem(path, key)
 	return value, nil
 }
