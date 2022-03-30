@@ -38,7 +38,7 @@ func (pp *prepushImpl) PredictPushBlocks(req ReqTask) []PushBlock {
 	ret := []PushBlock{}
 	pushTasks := pp.cachepool.Predict(req.path)
 	for i := range pushTasks {
-		ret = append(ret, PushBlock{})
+		ret = append(ret, PushBlock{req.reqHost, pushTasks[i]})
 	}
 	return ret
 }
@@ -57,7 +57,7 @@ func (pp *prepushImpl) StartPrepushWorker() {
 }
 
 func (pp *prepushImpl) PushBlock(block PushBlock) error {
-
+	// newReq :=
 	return nil
 }
 
