@@ -2,7 +2,6 @@ package cache
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/synclist"
@@ -28,15 +27,15 @@ func NewCacheList() CacheList {
 	sList, catchPaths := make(map[string]synclist.SyncList), synclist.NewSyncList()
 	ret := &cacheListImpl{sList, catchPaths, make(chan string, 16)}
 	ret.ListenAndCatchBlocks()
-	go func() {
-		for {
-			time.Sleep(5 * time.Second)
-			fmt.Println("[Log] : ")
-			for k := range ret.pathList {
-				fmt.Println(ret.GetItemsByPath(k))
-			}
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		time.Sleep(5 * time.Second)
+	// 		fmt.Println("[Log] : ")
+	// 		for k := range ret.pathList {
+	// 			fmt.Println(ret.GetItemsByPath(k))
+	// 		}
+	// 	}
+	// }()
 	return ret
 }
 
