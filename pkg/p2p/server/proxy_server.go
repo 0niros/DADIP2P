@@ -38,7 +38,7 @@ func StartProxyServer(config *configure.DeployConfig, isRun bool) *http.Server {
 		proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 	}
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-		const matchPattern = ".*/v2/blobs/sha256/.*/data"
+		const matchPattern = ".*/v2/.*/blobs/sha256:.*"
 		match1, _ := regexp.MatchString(matchPattern, req.URL.Path)
 		match2 := !strings.HasPrefix(req.URL.Path, fmt.Sprintf("/%s/", config.APIKey))
 		if match1 && match2 && req.Method == http.MethodGet {
