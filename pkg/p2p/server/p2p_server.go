@@ -22,7 +22,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
@@ -134,49 +133,39 @@ func (s Server) p2pHandler(w http.ResponseWriter, req *http.Request) {
 	log.Debug(req.Header)
 	defer log.Debug(w.Header())
 
-	if req.URL.Path[:len(s.config.APIKey)] == s.config.APIKey {
-		fn := req.URL.Path[len(s.config.APIKey)+2:]
-		agents := strings.Split(req.Header.Get("X-P2P-Agent"), " ")
-		agent := agents[len(agents)-1]
-		reqURL := fmt.Sprintf("%s?%s", fn, req.URL.RawQuery)
-		if len(agent) > 0 {
-			if accepted, redirect := s.cm.TryAccept(fn, agent); !accepted {
-				log.Infof("Request for %s from %s redirected to %s", fn, agent, redirect)
-				s.redirectHTTPHandler(w, req, redirect, reqURL)
-				return
-			}
-			log.Infof("Accept child %s for %s", agent, fn)
+	fn := req.URL.Path[len(s.config.APIKey)+2:]
+	agents := strings.Split(req.Header.Get("X-P2P-Agent"), " ")
+	agent := agents[len(agents)-1]
+	reqURL := fmt.Sprintf("%s?%s", fn, req.URL.RawQuery)
+	if len(agent) > 0 {
+		if accepted, redirect := s.cm.TryAccept(fn, agent); !accepted {
+			log.Infof("Request for %s from %s redirected to %s", fn, agent, redirect)
+			s.redirectHTTPHandler(w, req, redirect, reqURL)
+			return
 		}
-		newReq, err := http.NewRequest("GET", reqURL, nil)
-		if err != nil {
-			panic(err)
+		log.Infof("Accept child %s for %s", agent, fn)
+	}
+	newReq, err := http.NewRequest("GET", reqURL, nil)
+	if err != nil {
+		panic(err)
+	}
+	for k, vs := range req.Header {
+		for _, v := range vs {
+			newReq.Header.Add(k, v)
 		}
-		for k, vs := range req.Header {
-			for _, v := range vs {
-				newReq.Header.Add(k, v)
-			}
-		}
-		newReq.Header.Add("X-P2P-Agent", s.config.MyAddr)
-		log.Debugf("Cache Request %s %s %s", fn, newReq.Header.Get("X-P2P-Agent"), newReq.Header.Get("Range"))
-		file, err := s.config.Fs.Open(fn, newReq)
-		if err != nil {
-			panic(err)
-		} else {
-			log.Debugf("Serving %v", file)
-			w.Header().Set("X-P2P-Source", s.config.MyAddr)
-			w.Header().Set("Content-Type", "application/octet-stream")
-			w.Header().Del("Content-Length")
-			http.ServeContent(w, req, "file", time.Now(), file)
-			log.Debugf("Serve request done %s %v", fn, w.Header())
-		}
+	}
+	newReq.Header.Add("X-P2P-Agent", s.config.MyAddr)
+	log.Debugf("Cache Request %s %s %s", fn, newReq.Header.Get("X-P2P-Agent"), newReq.Header.Get("Range"))
+	file, err := s.config.Fs.Open(fn, newReq)
+	if err != nil {
+		panic(err)
 	} else {
-		newBuf := []byte{}
-		n, _ := req.Body.Read(newBuf)
-		path := req.Header.Get("")
-		offset, _ := strconv.Atoi(req.Header.Get(""))
-		if _, err := s.config.Fs.Record(path, offset, n, newBuf); err != nil {
-			log.Warn(err.Error())
-		}
+		log.Debugf("Serving %v", file)
+		w.Header().Set("X-P2P-Source", s.config.MyAddr)
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Del("Content-Length")
+		http.ServeContent(w, req, "file", time.Now(), file)
+		log.Debugf("Serve request done %s %v", fn, w.Header())
 	}
 
 }
