@@ -59,7 +59,7 @@ func StartProxyServer(config *configure.DeployConfig, isRun bool) *http.Server {
 		fmt.Println("1231231")
 		return r
 	})
-	log.Warnf("My Addr : %s\n", config.P2PConfig.MyAddr)
+	log.Warnf("My Addr : %s\n", config.ProxyConfig.Port)
 	addr := fmt.Sprintf(":%d", config.ProxyConfig.Port)
 	server := &http.Server{Addr: addr, Handler: proxy}
 	if isRun {

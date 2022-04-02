@@ -5,7 +5,7 @@ ProxyConfig:
   # Port, server port
   Port: 19245
   # ProxyHTTPS
-  ProxyHTTPS: false
+  ProxyHTTPS: true
   # CertConfig
   CertConfig:
     # CertPath
