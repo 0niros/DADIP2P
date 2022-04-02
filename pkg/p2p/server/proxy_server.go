@@ -38,7 +38,7 @@ func StartProxyServer(config *configure.DeployConfig, isRun bool) *http.Server {
 		proxy.OnRequest().HandleConnect(goproxy.AlwaysMitm)
 	}
 	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-		fmt.Printf("URL : %s\n", req.URL.Path)
+		log.Warnf("URL : %s\n", req.URL.Path)
 		match1 := strings.HasPrefix(req.URL.Path, "/v2/")
 		match2 := !strings.HasPrefix(req.URL.Path, fmt.Sprintf("/%s/", config.APIKey))
 		if match1 && match2 && req.Method == http.MethodGet {
@@ -63,9 +63,7 @@ func StartProxyServer(config *configure.DeployConfig, isRun bool) *http.Server {
 	addr := fmt.Sprintf(":%d", config.ProxyConfig.Port)
 	server := &http.Server{Addr: addr, Handler: proxy}
 	if isRun {
-		if err := server.ListenAndServe(); err != nil {
-			log.Errorf("Proxy server %s stop! %s", addr, err)
-		}
+		log.Fatal(http.ListenAndServe(addr, proxy))
 	}
 	return server
 }
