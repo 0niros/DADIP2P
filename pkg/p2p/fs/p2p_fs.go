@@ -21,6 +21,7 @@ import (
 	"net/http"
 
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/cache"
+	"github.com/alibaba/accelerated-container-image/pkg/p2p/configure"
 	"github.com/alibaba/accelerated-container-image/pkg/p2p/hostselector"
 
 	log "github.com/sirupsen/logrus"
@@ -40,11 +41,13 @@ type P2PFS struct {
 func (fs P2PFS) Open(path string, req *http.Request) (*P2PFile, error) {
 	newReq := ReqTask{path: path, reqHost: req.Host}
 	fs.prePush.CallPrepush(newReq)
+	log.Info("prePush : ", fs.prePush)
 	file := P2PFile{path, fs, 0, 0, newRemoteSource(req, fs.hp, fs.apikey)}
 	fileSize, err := file.Fstat()
 	if fs.prefetchable {
 		file.Prefetch(0, fileSize)
 	}
+	log.Debug("Get File with length : ", err)
 	return &file, err
 }
 
@@ -94,6 +97,7 @@ type Config struct {
 	HostPicker      hostselector.HostPicker
 	APIKey          string
 	PrefetchWorkers int
+	P2PConfig       configure.P2PConfig
 }
 
 // NewP2PFS constructor for P2PFS
@@ -104,6 +108,7 @@ func NewP2PFS(cfg *Config) *P2PFS {
 		apikey:       cfg.APIKey,
 		preTask:      make(chan prefetchTask, cfg.PrefetchWorkers),
 		prefetchable: cfg.PrefetchWorkers > 0,
+		prePush:      NewPrepush(&cfg.P2PConfig, cfg.CachePool),
 	}
 	for i := 0; i < cfg.PrefetchWorkers; i++ {
 		fs.prefetcher()

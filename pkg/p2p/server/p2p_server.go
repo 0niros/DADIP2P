@@ -52,6 +52,7 @@ func StartP2PServer(config *configure.DeployConfig, isRun bool) *http.Server {
 		HostPicker:      hp,
 		APIKey:          config.APIKey,
 		PrefetchWorkers: config.P2PConfig.PrefetchConfig.PrefetchThread,
+		P2PConfig:       config.P2PConfig,
 	})
 	serverHandler := newP2PServer(&Config{
 		MyAddr: config.P2PConfig.MyAddr,
@@ -130,10 +131,11 @@ func (s Server) p2pHandler(w http.ResponseWriter, req *http.Request) {
 			}
 		}
 	}()
-	log.Debug(req.Header)
-	defer log.Debug(w.Header())
+	log.Info("P2P GET : ")
+	//defer log.Debug(w.Header())
 	if strings.HasPrefix(req.URL.Path, fmt.Sprintf("/%s/", s.config.APIKey)) {
 		fn := req.URL.Path[len(s.config.APIKey)+2:]
+		log.Info(fn)
 		agents := strings.Split(req.Header.Get("X-P2P-Agent"), " ")
 		agent := agents[len(agents)-1]
 		reqURL := fmt.Sprintf("%s?%s", fn, req.URL.RawQuery)
@@ -147,6 +149,7 @@ func (s Server) p2pHandler(w http.ResponseWriter, req *http.Request) {
 		}
 		newReq, err := http.NewRequest("GET", reqURL, nil)
 		if err != nil {
+			log.Debug(err)
 			panic(err)
 		}
 		for k, vs := range req.Header {
@@ -158,6 +161,7 @@ func (s Server) p2pHandler(w http.ResponseWriter, req *http.Request) {
 		log.Debugf("Cache Request %s %s %s", fn, newReq.Header.Get("X-P2P-Agent"), newReq.Header.Get("Range"))
 		file, err := s.config.Fs.Open(fn, newReq)
 		if err != nil {
+			log.Debug(err)
 			panic(err)
 		} else {
 			log.Debugf("Serving %v", file)

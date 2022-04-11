@@ -32,6 +32,7 @@ type prepushImpl struct {
 
 func (pp *prepushImpl) CallPrepush(req ReqTask) {
 	pp.reqTask <- req
+	log.Info("Prepush Get Req ==> ", req)
 }
 
 func (pp *prepushImpl) PredictPushBlocks(req ReqTask) []PushBlock {
@@ -61,12 +62,12 @@ func (pp *prepushImpl) PushBlock(block PushBlock) error {
 	return nil
 }
 
-func NewPrepush(config *configure.DeployConfig, cachePool cache.FileCachePool) Prepush {
+func NewPrepush(config *configure.P2PConfig, cachePool cache.FileCachePool) Prepush {
 	pp := &prepushImpl{
-		prepushEnable:  config.P2PConfig.PrepushConfig.PrepushEnable,
-		prepushWorkers: int64(config.P2PConfig.PrepushConfig.PrepushWorkers),
+		prepushEnable:  config.PrepushConfig.PrepushEnable,
+		prepushWorkers: int64(config.PrepushConfig.PrepushWorkers),
 		cachepool:      cachePool,
-		reqTask:        make(chan ReqTask, config.P2PConfig.PrepushConfig.PrepushWorkers),
+		reqTask:        make(chan ReqTask, config.PrepushConfig.PrepushWorkers),
 	}
 
 	for i := 0; i < int(pp.prepushWorkers); i++ {

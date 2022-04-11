@@ -1,5 +1,7 @@
 # Log level, debug | info | warn | error | panic
 LogLevel: "debug"
+# APIKey
+APIKey: "dadip2p"
 # ProxyConfig
 ProxyConfig:
   # Port, server port
@@ -23,11 +25,9 @@ P2PConfig:
   # DetectAddr, if not set NodeIP, we will use detect addr to get outbound ip
   DetectAddr: "8.8.8.8:80"
   # ServeBySSL, used to determine serve on https
-  ServeBySSL: true
+  ServeBySSL: false
   # Port, serve port
   Port: 19145
-  # APIKey
-  APIKey: "dadip2p"
   # CacheConfig
   CacheConfig:
     # FileCacheSize
