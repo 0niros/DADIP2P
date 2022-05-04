@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2022-05-04T08:50:30.926Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36 Edg/101.0.1210.32" etag="fIRYYAopec_B68tFUbV1" version="17.5.0" type="github">
+<mxfile host="app.diagrams.net" modified="2022-05-04T08:51:30.844Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.41 Safari/537.36 Edg/101.0.1210.32" etag="n_Z3OORm3tnnWZGOhPvA" version="17.5.0" type="github">
   <diagram id="6a731a19-8d31-9384-78a2-239565b7b9f0" name="Page-1">
     <mxGraphModel dx="1008" dy="644" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" background="none" math="0" shadow="0">
       <root>
@@ -80,7 +80,7 @@
             <mxPoint x="-4" y="-2" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="vj2o7m0hhVi2Fh1mlhdn-1800" value="HTTP" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="1">
+        <mxCell id="vj2o7m0hhVi2Fh1mlhdn-1800" value="HTTPS" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="1">
           <mxGeometry x="530.0036119052963" y="159.99773532324966" as="geometry">
             <mxPoint x="-11" as="offset" />
           </mxGeometry>
